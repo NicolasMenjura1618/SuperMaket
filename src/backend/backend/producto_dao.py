@@ -1,5 +1,18 @@
 import mysql.connector
 from database import DatabaseConnection
+import logging
+
+def setup_logger():
+    """Set up the logger for the application."""
+    logger = logging.getLogger('producto_dao')
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
+logger = setup_logger()
 
 class ProductoDAO:
     """Clase de acceso a datos para productos."""
@@ -14,7 +27,7 @@ class ProductoDAO:
             productos = cursor.fetchall()
             return productos
         except Exception as e:
-            print(f"❌ Error al obtener productos: {e}")
+            logger.error(f"❌ Error al obtener productos: {e}")
             return []
 
     @staticmethod
@@ -27,13 +40,26 @@ class ProductoDAO:
             producto = cursor.fetchone()
             return producto
         except Exception as e:
-            print(f"❌ Error al obtener producto por ID: {e}")
+            logger.error(f"❌ Error al obtener producto por ID: {e}")
             return None
 
     @staticmethod
     def agregar_producto(nombre, precio, descripcion, imagen):
         """Inserta un nuevo producto en la base de datos."""
         try:
+            if not nombre or not isinstance(nombre, str):
+                logger.error("El campo 'name' es obligatorio y debe ser una cadena")
+                return
+            if not precio or not isinstance(precio, (int, float)):
+                logger.error("El campo 'price' es obligatorio y debe ser un número")
+                return
+            if not descripcion or not isinstance(descripcion, str):
+                logger.error("El campo 'description' es obligatorio y debe ser una cadena")
+                return
+            if not isinstance(imagen, bytes):
+                logger.error("El campo 'image' debe ser de tipo bytes")
+                return
+
             conexion = DatabaseConnection().get_connection()
             cursor = conexion.cursor()
             consulta = """
@@ -42,6 +68,6 @@ class ProductoDAO:
             """
             cursor.execute(consulta, (nombre, precio, descripcion, imagen))
             conexion.commit()
-            print("✅ Producto agregado correctamente.")
+            logger.info("✅ Producto agregado correctamente.")
         except Exception as e:
-            print(f"❌ Error al agregar producto: {e}")
+            logger.error(f"❌ Error al agregar producto: {e}")
