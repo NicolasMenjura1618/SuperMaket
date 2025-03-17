@@ -1,9 +1,6 @@
 from flask import Flask, request, jsonify
 from producto_dao import ProductoDAO
 import base64
-from logger import setup_logger
-
-logger = setup_logger()
 
 app = Flask(__name__)
 
@@ -20,7 +17,7 @@ def obtener_productos():
             return jsonify({"productos": productos}), 200
         return jsonify({"mensaje": "No hay productos disponibles"}), 404
     except Exception as e:
-        logger.error(f"⚠️ Error en obtener_productos: {e}")
+        print(f"⚠️ Error en obtener_productos: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
 @app.route("/productos/<int:producto_id>", methods=["GET"])
@@ -34,7 +31,7 @@ def obtener_producto(producto_id):
             return jsonify({"producto": producto}), 200
         return jsonify({"mensaje": "Producto no encontrado"}), 404
     except Exception as e:
-        logger.error(f"⚠️ Error en obtener_producto: {e}")
+        print(f"⚠️ Error en obtener_producto: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
 @app.route("/productos", methods=["POST"])
@@ -64,7 +61,7 @@ def agregar_producto():
         ProductoDAO.agregar_producto(nombre, precio, descripcion, imagen_bytes)
         return jsonify({"mensaje": "Producto agregado exitosamente"}), 201
     except Exception as e:
-        logger.error(f"⚠️ Error en agregar_producto: {e}")
+        print(f"⚠️ Error en agregar_producto: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
 if __name__ == "__main__":
